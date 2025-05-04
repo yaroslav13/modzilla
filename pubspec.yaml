@@ -1,0 +1,27 @@
+name: modzilla
+description: This module facilitates the initialization of modules and the seamless provision of dependencies across the widget tree.
+
+version: 1.0.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # hooks
+  flutter_hooks: 0.21.2
+
+  # service locator
+  get_it: 8.0.3
+
+  # navigation:
+  go_router: 15.1.1
+
+  # annotations
+  meta: ^1.15.0
+
+flutter:
+  uses-material-design: true
+
