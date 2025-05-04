@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modzilla/modzilla.dart';
+import 'package:modzilla/src/root/root_dependencies_provider.dart';
 
 final class ModuleBridgeWidget extends StatefulWidget {
   const ModuleBridgeWidget({
@@ -19,34 +20,35 @@ final class ModuleBridgeWidget extends StatefulWidget {
 }
 
 final class _ModuleBridgeWidgetState extends State<ModuleBridgeWidget> {
-  late Future<void> _dependenciesInitializer;
-
   void _initDependencies() {
-    _dependenciesInitializer = widget.dependenciesScope.initScope();
+    final bundle = RootDependenciesProvider.of(context);
+
+    widget.dependenciesScope.pushScope(bundle);
+  }
+
+  Future<void> _disposeDependencies() async {
+    final bundle = RootDependenciesProvider.of(context);
+
+    await widget.dependenciesScope.disposeScope(bundle);
   }
 
   @override
   void initState() {
     super.initState();
 
-    _initDependencies();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _initDependencies(),
+    );
   }
 
   @override
   void dispose() {
-    unawaited(widget.dependenciesScope.disposeScope());
+    unawaited(_disposeDependencies());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _dependenciesInitializer,
-      builder: (_, snapshot) {
-        return snapshot.connectionState == ConnectionState.done
-            ? widget.child
-            : const SizedBox.shrink();
-      },
-    );
+    return widget.child;
   }
 }

@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:modzilla/src/dependencies/dependencies_factory.dart';
-import 'package:modzilla/src/dependencies/dependencies_factory_provider.dart';
+import 'package:modzilla/src/dependencies/dependencies_bundle.dart';
 import 'package:modzilla/src/root/root_dependencies_scope.dart';
 
 final class RootDependenciesProvider extends StatefulWidget {
@@ -15,6 +14,10 @@ final class RootDependenciesProvider extends StatefulWidget {
   final RootDependenciesScope rootDependenciesScope;
   final Widget child;
 
+  static DependenciesBundle of(BuildContext context) {
+    return _DependenciesBundleProvider.of(context).bundle;
+  }
+
   @override
   State<RootDependenciesProvider> createState() =>
       _RootDependenciesProviderState();
@@ -22,7 +25,7 @@ final class RootDependenciesProvider extends StatefulWidget {
 
 final class _RootDependenciesProviderState
     extends State<RootDependenciesProvider> {
-  late Future<DependenciesFactory> _dependenciesInitializer;
+  late Future<DependenciesBundle> _dependenciesInitializer;
 
   void _initDependencies() {
     _dependenciesInitializer = widget.rootDependenciesScope.init();
@@ -56,12 +59,29 @@ final class _RootDependenciesProviderState
       future: _dependenciesInitializer,
       builder: (_, snapshot) {
         return snapshot.connectionState == ConnectionState.done
-            ? DependenciesFactoryProvider(
-                factory: snapshot.requireData,
+            ? _DependenciesBundleProvider(
+                bundle: snapshot.requireData,
                 child: widget.child,
               )
             : const SizedBox.shrink();
       },
     );
+  }
+}
+
+final class _DependenciesBundleProvider extends InheritedWidget {
+  const _DependenciesBundleProvider({
+    required this.bundle,
+    required super.child,
+  });
+
+  final DependenciesBundle bundle;
+
+  static _DependenciesBundleProvider of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_DependenciesBundleProvider>()!;
+
+  @override
+  bool updateShouldNotify(_DependenciesBundleProvider oldWidget) {
+    return bundle != oldWidget.bundle;
   }
 }

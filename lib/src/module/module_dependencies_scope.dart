@@ -1,5 +1,7 @@
-abstract interface class ModuleDependenciesScope {
-  Future<void> initScope();
+import 'package:modzilla/src/dependencies/dependencies_bundle.dart';
 
-  Future<void> disposeScope();
+abstract interface class ModuleDependenciesScope<T extends Object> {
+  void pushScope(DependenciesBundle<T> bundle);
+
+  Future<void> disposeScope(DependenciesBundle<T> bundle);
 }
